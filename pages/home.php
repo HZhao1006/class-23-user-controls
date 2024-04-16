@@ -14,14 +14,22 @@ $nav_home_class = "active_page";
   <main>
     <h2>INFO/CS 2300; NBA 5301</h2>
 
+    <?php if (is_user_logged_in()) { ?>
+      <p>Welcome <strong><?php echo htmlspecialchars($current_user['name']); ?></strong>!</p>
+    <?php } ?>
+
     <p>This website is rendered server-side in PHP.</p>
 
     <!-- Note: Avoid outputting your PHP version in your production HTML.         -->
     <!--       Malicious actors may use the version to try and hack your website. -->
     <p>You're running PHP version: <strong><?php echo phpversion(); ?></strong>.</p>
 
-    <h2>Sign In</h2>
+    <?php if (!is_user_logged_in()) { ?>
+      <h2>Sign In</h2>
 
+      <?php echo login_form('/', $session_messages); ?>
+
+    <?php } ?>
   </main>
 
   <?php include "includes/footer.php" ?>

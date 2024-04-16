@@ -18,90 +18,94 @@ $page_title = "Clipart Plop Box";
 
 $nav_plopbox_class = "active_page";
 
-// Set maximum file size for uploaded files.
-// MAX_FILE_SIZE must be set to bytes
-// 1 MB = 1000000 bytes
-define("MAX_FILE_SIZE", 1000000);
+// Access Control - Only logged in users may upload
+if (is_user_logged_in()) {
 
-$upload_feedback = array(
-  "general_error" => false,
-  "too_large" => false
-);
+  // Set maximum file size for uploaded files.
+  // MAX_FILE_SIZE must be set to bytes
+  // 1 MB = 1000000 bytes
+  define("MAX_FILE_SIZE", 1000000);
 
-// upload fields
-$upload_source = NULL;
-$upload_file_name = NULL;
-$upload_file_ext = NULL;
+  $upload_feedback = array(
+    "general_error" => false,
+    "too_large" => false
+  );
 
-// Users must be logged in to upload files!
-if (isset($_POST["upload"])) {
+  // upload fields
+  $upload_source = NULL;
+  $upload_file_name = NULL;
+  $upload_file_ext = NULL;
 
-  $upload_source = trim($_POST["source"]); // untrusted
-  if ($upload_source == "") {
-    $upload_source = NULL;
-  }
+  // Users must be logged in to upload files!
+  if (isset($_POST["upload"])) {
 
-  // get the info about the uploaded files.
-  $upload = $_FILES["svg-file"];
+    $upload_source = trim($_POST["source"]); // untrusted
+    if ($upload_source == "") {
+      $upload_source = NULL;
+    }
 
-  // Assume the form is valid...
-  $form_valid = true;
+    // get the info about the uploaded files.
+    $upload = $_FILES["svg-file"];
 
-  // file is required
-  if ($upload["error"] == UPLOAD_ERR_OK) {
-    // The upload was successful!
+    // Assume the form is valid...
+    $form_valid = true;
 
-    // Get the name of the uploaded file without any path
-    $upload_file_name = basename($upload["name"]);
+    // file is required
+    if ($upload["error"] == UPLOAD_ERR_OK) {
+      // The upload was successful!
 
-    // Get the file extension of the uploaded file and convert to lowercase for consistency in DB
-    $upload_file_ext = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
+      // Get the name of the uploaded file without any path
+      $upload_file_name = basename($upload["name"]);
 
-    // This site only accepts SVG files!
-    if (!in_array($upload_file_ext, array("svg"))) {
+      // Get the file extension of the uploaded file and convert to lowercase for consistency in DB
+      $upload_file_ext = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
+
+      // This site only accepts SVG files!
+      if (!in_array($upload_file_ext, array("svg"))) {
+        $form_valid = false;
+        $upload_feedback["general_error"] = true;
+      }
+    } else if (($upload["error"] == UPLOAD_ERR_INI_SIZE) || ($upload["error"] == UPLOAD_ERR_FORM_SIZE)) {
+      // file was too big, let's try again
+      $form_valid = false;
+      $upload_feedback["too_large"] = true;
+    } else {
+      // upload was not successful
       $form_valid = false;
       $upload_feedback["general_error"] = true;
     }
-  } else if (($upload["error"] == UPLOAD_ERR_INI_SIZE) || ($upload["error"] == UPLOAD_ERR_FORM_SIZE)) {
-    // file was too big, let's try again
-    $form_valid = false;
-    $upload_feedback["too_large"] = true;
-  } else {
-    // upload was not successful
-    $form_valid = false;
-    $upload_feedback["general_error"] = true;
-  }
 
-  if ($form_valid) {
-    // insert upload into DB
-    $result = exec_sql_query(
-      $db,
-      "INSERT INTO clipart (file_name, file_ext, source) VALUES (:file_name, :file_ext, :source)",
-      array(
-        ":file_name" => $upload_file_name,
-        ":file_ext" => $upload_file_ext,
-        ":source" => $upload_source
-      )
-    );
+    if ($form_valid) {
+      // insert upload into DB
+      $result = exec_sql_query(
+        $db,
+        "INSERT INTO clipart (file_name, file_ext, source) VALUES (:file_name, :file_ext, :source)",
+        array(
+          ":file_name" => $upload_file_name,
+          ":file_ext" => $upload_file_ext,
+          ":source" => $upload_source
+        )
+      );
 
-    if ($result) {
-      // We successfully inserted the record into the database, now we need to
-      // move the uploaded file to it's final resting place: public/uploads directory
+      if ($result) {
+        // We successfully inserted the record into the database, now we need to
+        // move the uploaded file to it's final resting place: public/uploads directory
 
-      // get the newly inserted record's id
-      $record_id = $db->lastInsertId("id");
+        // get the newly inserted record's id
+        $record_id = $db->lastInsertId("id");
 
-      // uploaded file should be in folder with same name as table with the primary key as the filename.
-      // Note: THIS IS NOT A URL; this is a FILE PATH on the server!
-      //       Do NOT include / at the beginning of the path; path should be a relative path.
-      //          NO: /public/...
-      //         YES:  public/...
-      $upload_storage_path = "public/uploads/clipart/" . $record_id . "." . $upload_file_ext;
+        // uploaded file should be in folder with same name as table with the primary key as the filename.
+        // Note: THIS IS NOT A URL; this is a FILE PATH on the server!
+        //       Do NOT include / at the beginning of the path; path should be a relative path.
+        //          NO: /public/...
+        //         YES:  public/...
+        $upload_storage_path = "public/uploads/clipart/" . $record_id . "." . $upload_file_ext;
 
-      // Move the file to the public/uploads/clipart folder
-      // Note: THIS FUNCTION REQUIRES A PATH. NOT A URL!
-      if (move_uploaded_file($upload["tmp_name"], $upload_storage_path) == false) {
-        error_log("Failed to permanently store the uploaded file on the file server. Please check that the server folder exists.");
+        // Move the file to the public/uploads/clipart folder
+        // Note: THIS FUNCTION REQUIRES A PATH. NOT A URL!
+        if (move_uploaded_file($upload["tmp_name"], $upload_storage_path) == false) {
+          error_log("Failed to permanently store the uploaded file on the file server. Please check that the server folder exists.");
+        }
       }
     }
   }
@@ -158,37 +162,54 @@ $records = exec_sql_query(
     </section>
 
     <section class="upload">
-      <h2>Upload Clipart</h2>
 
-      <form action="/plopbox" method="post" enctype="multipart/form-data">
+      <?php
+      // Access Controls - Interface: Only logged in users may upload
+      if (is_user_logged_in()) { ?>
 
-        <!-- MAX_FILE_SIZE must precede the file input field -->
-        <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo MAX_FILE_SIZE; ?>">
+        <h2>Upload Clipart</h2>
 
-        <?php if ($upload_feedback["too_large"]) { ?>
-          <p class="feedback">We're sorry. The file failed to upload because it was too big. Please select a file that&apos;s no larger than 1MB.</p>
-        <?php } ?>
+        <form action="/plopbox" method="post" enctype="multipart/form-data">
 
-        <?php if ($upload_feedback["general_error"]) { ?>
-          <p class="feedback">We're sorry. Something went wrong. Please select an SVG file to upload.</p>
-        <?php } ?>
+          <!-- MAX_FILE_SIZE must precede the file input field -->
+          <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo MAX_FILE_SIZE; ?>">
 
-        <div class="label-input">
-          <label for="upload-file">SVG File:</label>
-          <!-- This site only accepts SVG files! -->
-          <input id="upload-file" type="file" name="svg-file" accept=".svg,image/svg+xml">
-        </div>
+          <?php if ($upload_feedback["too_large"]) { ?>
+            <p class="feedback">We're sorry. The file failed to upload because it was too big. Please select a file that&apos;s no larger than 1MB.</p>
+          <?php } ?>
 
-        <div class="label-input">
-          <label for="upload-source" class="optional">Source URL:</label>
-          <input id="upload-source" type="url" name="source" placeholder="URL where found. (optional)">
-        </div>
+          <?php if ($upload_feedback["general_error"]) { ?>
+            <p class="feedback">We're sorry. Something went wrong. Please select an SVG file to upload.</p>
+          <?php } ?>
 
-        <div class="align-right">
-          <button type="submit" name="upload">Upload Clipart</button>
-        </div>
+          <div class="label-input">
+            <label for="upload-file">SVG File:</label>
+            <!-- This site only accepts SVG files! -->
+            <input id="upload-file" type="file" name="svg-file" accept=".svg,image/svg+xml">
+          </div>
 
-      </form>
+          <div class="label-input">
+            <label for="upload-source" class="optional">Source URL:</label>
+            <input id="upload-source" type="url" name="source" placeholder="URL where found. (optional)">
+          </div>
+
+          <div class="align-right">
+            <button type="submit" name="upload">Upload Clipart</button>
+          </div>
+
+        </form>
+
+      <?php } else {
+        // user is not logged in. show login form
+      ?>
+
+        <h2>Sign In</h2>
+
+        <p>Please login to upload clipart to Plop Box</p>
+
+      <?php echo login_form('/plopbox#upload', $session_messages);
+      } ?>
+
     </section>
 
   </main>
