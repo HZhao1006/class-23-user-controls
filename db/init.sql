@@ -1,5 +1,31 @@
 -- database: ../test.sqlite
 --
+--- Users ---
+CREATE TABLE users (
+  id INTEGER NOT NULL UNIQUE,
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  PRIMARY KEY(id AUTOINCREMENT)
+);
+
+INSERT INTO
+  users (id, username, password)
+VALUES
+  (
+    1,
+    'hang',
+    '123456787' -- monkey
+  );
+
+--- Sessions ---
+CREATE TABLE sessions (
+  id INTEGER NOT NULL UNIQUE,
+  user_id INTEGER NOT NULL,
+  session TEXT NOT NULL UNIQUE,
+  last_login TEXT NOT NULL,
+  PRIMARY KEY(id AUTOINCREMENT) FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
 --- Flower Sample Requests ---
 CREATE TABLE flower_samples (
   id INTEGER NOT NULL UNIQUE,

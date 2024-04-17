@@ -26,7 +26,7 @@ Visit <http://127.0.0.1:8080/> in a browser to access the development server.
     VALUES
       (
         1,
-        'TODO: username',
+        'username',
         '$2y$10$QtCybkpkzh7x5VN11APHned4J8fu78.eFXlyAMmahuAaNcbwZ7FH.' -- monkey
       );
 
@@ -74,7 +74,7 @@ Visit <http://127.0.0.1:8080/> in a browser to access the development server.
 1. Show a welcome message on the home page **only** when the user is logged in.
 
     ```php
-    <p>Welcome <strong><?php echo htmlspecialchars($current_user['name']); ?></strong>!</p>
+    <p>Welcome <strong><?php echo htmlspecialchars($current_user['username']); ?></strong>!</p>
     ```
 
     **Hint:** `if (is_user_logged_in()) { ... }`

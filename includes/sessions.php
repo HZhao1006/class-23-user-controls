@@ -261,22 +261,21 @@ function login_form($action, $messages)
       echo "<li class=\"feedback\"><strong>" . htmlspecialchars($message) . "</strong></li>\n";
     } ?>
   </ul>
+    <form class="login" action="<?php echo htmlspecialchars($action) ?>" method="post" novalidate>
+      <div class="label-input">
+        <label for="username">Username:</label>
+        <input id="username" type="text" name="login_username" value="<?php echo htmlspecialchars($sticky_login_username ?? ""); ?>" required />
+      </div>
 
-  <form class="login" action="<?php echo htmlspecialchars($action) ?>" method="post" novalidate>
-    <div class="label-input">
-      <label for="username">Username:</label>
-      <input id="username" type="text" name="login_username" value="<?php echo htmlspecialchars($sticky_login_username ?? ""); ?>" required />
-    </div>
+      <div class="label-input">
+        <label for="password">Password:</label>
+        <input id="password" type="password" name="login_password" required />
+      </div>
 
-    <div class="label-input">
-      <label for="password">Password:</label>
-      <input id="password" type="password" name="login_password" required />
-    </div>
-
-    <div class="align-right">
-      <button name="login" type="submit">Sign In</button>
-    </div>
-  </form>
+      <div class="align-right">
+        <button name="login" type="submit">Sign In</button>
+      </div>
+    </form>
 <?php
   $html = ob_get_clean();
   return $html;
@@ -349,7 +348,7 @@ function create_account($db, $name, $username, $password, $password_confirmation
     }
   }
 
-  // TODO: check if password meets security requirements.
+  // check if password meets security requirements.
   if (empty($password)) {
     $account_valid = False;
     array_push($signup_messages, "Please provide a password.");

@@ -94,6 +94,7 @@ if ($php_file = match_routes($request_uri, ROUTES)) {
   // Include PHP file from route look-up
   require_once "includes/init.php";
   require $php_file;
+
 } else if ($file_path = match_static($request_uri)) {
   if ($file_path == $request_uri) {
     // let the web server respond for static resources

@@ -13,6 +13,9 @@ $nav_home_class = "active_page";
 
   <main>
     <h2>INFO/CS 2300; NBA 5301</h2>
+    <?php if (is_user_logged_in()) { ?>
+      <p>Welcome <strong><?php echo htmlspecialchars($current_user['username']); ?></strong>!</p>
+    <?php } ?>
 
     <p>This website is rendered server-side in PHP.</p>
 
@@ -21,6 +24,10 @@ $nav_home_class = "active_page";
     <p>You're running PHP version: <strong><?php echo phpversion(); ?></strong>.</p>
 
     <h2>Sign In</h2>
+
+    <?php if (!is_user_logged_in()){ ?>
+    <?php echo login_form('/', $session_messages); ?>
+    <?php } ?>
 
   </main>
 
