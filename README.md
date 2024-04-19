@@ -26,7 +26,7 @@ Visit <http://127.0.0.1:8080/> in a browser to access the development server.
     VALUES
       (
         1,
-        'TODO: username',
+        'username',
         '$2y$10$QtCybkpkzh7x5VN11APHned4J8fu78.eFXlyAMmahuAaNcbwZ7FH.' -- monkey
       );
 

@@ -3,35 +3,27 @@
 --- Users ---
 CREATE TABLE users (
   id INTEGER NOT NULL UNIQUE,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
   username TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
   PRIMARY KEY(id AUTOINCREMENT)
 );
 
--- password: monkey
 INSERT INTO
-  users (id, name, email, username, password)
+  users (id, username, password)
 VALUES
   (
     1,
-    'Kyle Harms',
-    'kyle.harms@cornell.edu',
-    'kyle',
-    '$2y$10$QtCybkpkzh7x5VN11APHned4J8fu78.eFXlyAMmahuAaNcbwZ7FH.'
+    'hang',
+    '949949hang' -- monkey
   );
 
--- password: monkey
 INSERT INTO
-  users (id, name, email, username, password)
+  users (id, username, password)
 VALUES
   (
     2,
-    'Sharon Jeong',
-    'sharon@example.com',
-    'sharon',
-    '$2y$10$QtCybkpkzh7x5VN11APHned4J8fu78.eFXlyAMmahuAaNcbwZ7FH.'
+    'wang',
+    '949949wang' -- monkey
   );
 
 --- Sessions ---

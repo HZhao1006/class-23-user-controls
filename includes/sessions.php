@@ -349,7 +349,7 @@ function create_account($db, $name, $username, $password, $password_confirmation
     }
   }
 
-  // TODO: check if password meets security requirements.
+  // check if password meets security requirements.
   if (empty($password)) {
     $account_valid = False;
     array_push($signup_messages, "Please provide a password.");
